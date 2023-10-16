@@ -1,0 +1,11 @@
+{
+    "repo_owner": "",
+    "repo_name": "",
+    "access_token": "",
+
+    "custom": {
+        "issue_title": "",
+        "issue_message": "",
+        "how_many_issues": 100
+    }
+}
