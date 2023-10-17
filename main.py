@@ -1,55 +1,57 @@
-import os, time, json, sys, random, string, ctypes
+import os
+import json
+import requests
+import ctypes
+from dataclasses import dataclass
 
-try:
-    import requests, colored, pystyle
-except ModuleNotFoundError:
-    os.system("pip install requests")
-    os.system("pip install colored")
-    os.system("pip install pystyle")
 
-from colored import fg, attr
-from pystyle import Write, System, Colors, Colorate
+@dataclass
+class GitHubIssueConfig:
+    repo_owner: str
+    repo_name: str
+    access_token: str
+    issue_title: str
+    issue_body: str
+    how_many: int
 
-a = fg("#babaf8")
-b = fg("#7c7cf8")
-c = fg("#3e3ef8")
-d = fg("#40E0D0")
-e = fg("#00008B")
-reset = attr(0)
+class GitHubIssueCreator:
+    def __init__(self, config: GitHubIssueConfig):
+        self.config = config
 
-def github_issue_creator(repo_owner, repo_name, access_token, issue_title, issue_body):
-    if repo_owner == "\x48\x34\x63\x4B\x33\x64\x52\x34\x44\x75": exit()
-    url = f'https://api.github.com/repos/{repo_owner}/{repo_name}/issues'
+    @staticmethod
+    def load_config(config_file):
+        with open(config_file, 'r', encoding='utf-8') as file:
+            config_data = json.load(file)
+            return GitHubIssueConfig(**config_data)
 
-    issue_data = {
-        'title': issue_title,
-        'body': issue_body
-    }
+    def create_github_issue(self):
+        url = f'https://api.github.com/repos/{self.config.repo_owner}/{self.config.repo_name}/issues'
+        issue_data = {
+            'title': self.config.issue_title,
+            'body': self.config.issue_body
+        }
+        headers = {
+            'Authorization': f'token {self.config.access_token}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+        status_code = self.github_issue_creator(url, issue_data, headers)
+        if status_code == 201:
+            print(f"Created Issue ~ {self.config.repo_owner}/{self.config.repo_name}")
 
-    headers = {
-        'Authorization': f'token {access_token}',
-        'Accept': 'application/vnd.github.v3+json'
-    }
+    @staticmethod
+    def github_issue_creator(url, issue_data, headers):
+        response = requests.post(url, data=json.dumps(issue_data), headers=headers)
+        return response.status_code
 
-    response = requests.post(url, data=json.dumps(issue_data), headers=headers)
-    if response.status_code == 201:
-        print(f"{a}({c}+{a}) {e}Created {b}Issue {d}~ {a}{repo_owner}{reset}/{a}{repo_name}")
-    else:
-        pass
+    def run(self):
+        ctypes.windll.kernel32.SetConsoleTitleW('[GitHub Issue Creator] created by H4cK3dR4Du | updated by cxstles (reciprocated)')
+        for _ in range(self.config.how_many):
+            self.create_github_issue()
 
-config = json.load(open('config.json', 'r', encoding='utf-8'))
-repo_owner, repo_name, access_token = config['repo_owner'], config['repo_name'], config['access_token']
-if repo_owner == "\x48\x34\x63\x4B\x33\x64\x52\x34\x44\x75": exit()
-issue_title, issue_body, howmany = config['custom']['issue_title'], config['custom']['issue_message'], config['custom']['how_many_issues']
+    def __str__(self):
+        return f"GitHub Issue Creator for {self.config.repo_owner}/{self.config.repo_name}"
 
-ctypes.windll.kernel32.SetConsoleTitleW(f'[ Github Issue Creator ] Made By H4cK3dR4Du (.gg/radutool) | https://github.com/H4cK3dR4Du')
-print(f"""
-{a}\t\t\t\t  ╦═╗╔═╗╔╦╗╦ ╦  ╦╔═╗╔═╗╦ ╦╔═╗  ╔═╗╦═╗╔═╗╔═╗╔╦╗╔═╗╦═╗
-{b}\t\t\t\t  ╠╦╝╠═╣ ║║║ ║  ║╚═╗╚═╗║ ║║╣   ║  ╠╦╝║╣ ╠═╣ ║ ║ ║╠╦╝
-{c}\t\t\t\t  ╩╚═╩ ╩═╩╝╚═╝  ╩╚═╝╚═╝╚═╝╚═╝  ╚═╝╩╚═╚═╝╩ ╩ ╩ ╚═╝╩╚═
-""")
-
-for nword_pizdamati_omfg_romaniathebest_pula_pizda_ez_puelakfwejf in range(int(howmany)):
-    if repo_owner == "\x48\x34\x63\x4B\x33\x64\x52\x34\x44\x75": exit()
-    github_issue_creator(repo_owner, repo_name, access_token, issue_title, issue_body)
-    
+if __name__ == "__main__":
+    config = GitHubIssueCreator.load_config('config.json')
+    issue_creator = GitHubIssueCreator(config)
+    issue_creator.run()
