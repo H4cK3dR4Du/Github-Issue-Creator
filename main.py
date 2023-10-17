@@ -18,6 +18,12 @@ class GitHubIssueCreator:
     def __init__(self, config: GitHubIssueConfig):
         self.config = config
 
+    @staticmethod
+    def load_config(config_file):
+        with open(config_file, 'r', encoding='utf-8') as file:
+            config_data = json.load(file)
+            return GitHubIssueConfig(**config_data)
+
     def create_github_issue(self):
         url = f'https://api.github.com/repos/{self.config.repo_owner}/{self.config.repo_name}/issues'
         issue_data = {
